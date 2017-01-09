@@ -38,12 +38,14 @@ def loadGraph(filename):
             graph[y].add(x)
     return graph
 
+#Add collision between nodes
 def addCollision(filename, v1, v2):
     with open(filename, "a") as outputFile:
         aux = v1 + " " + v2 + "\n"
         outputFile.write(aux)
     return
 
+#Request parsing and operations mapping
 def processRequest(request_text):
     #Parse request message
     request = str(request_text)
@@ -57,9 +59,9 @@ def processRequest(request_text):
     global collisionNets
     global FILENAME
 
-    if aux[1].lower() == "search" and len(aux) == 4:
+    if aux[1].lower() == "search" and len(aux) == 4: #Answer if two nodes belong to the same collision network
         return '{"status":"ok", "nodesHaveCollision":"' + str(searchCollision(collisionNets, aux[2], aux[3])) + '"}'
-    if aux[1].lower() == "add" and len(aux) == 4:
+    if aux[1].lower() == "add" and len(aux) == 4: #Add new collision between two nodes
         if searchCollision(collisionNets, aux[2], aux[3]) == False:
             addCollision(FILENAME, aux[2], aux[3])
             collisionNets = loadGraph(FILENAME) #Reload the graph after changes
@@ -85,7 +87,6 @@ print ("Serving HTTP on port %s..." % PORT)
 while True:
     client_connection, client_address = listen_socket.accept()
     request = client_connection.recv(2048)
-
     response = processRequest(request)
     http_response = "HTTP/1.1 200 OK\n"+"Content-Type: application/json\n"+"\n"+response+"\n"
     client_connection.sendall(http_response.encode('utf-8'))

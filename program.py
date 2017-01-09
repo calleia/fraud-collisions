@@ -16,7 +16,6 @@ def searchCollision(graph, start, end):
             queue.extend(graph[vertex] - visited)
     return False
 
-
 #Load collision graph as an adjacency list
 def loadGraph(filename):
     with open(filename, "r") as inputFile:
@@ -35,7 +34,7 @@ def loadGraph(filename):
             graph[y].add(x)
     return graph
 
-
+#Add collision between nodes
 def addCollision(filename, v1, v2):
     with open(filename, "a") as outputFile:
         aux = v1 + " " + v2 + "\n"
@@ -48,9 +47,10 @@ FILENAME = "collision-networks.txt"
 
 collisionNets = loadGraph(FILENAME)
 
-if len(sys.argv) == 3:
+#Parse command line arguments
+if len(sys.argv) == 3: #Answer if two nodes belong to the same collision network
     print(searchCollision(collisionNets, sys.argv[1], sys.argv[2]))
-elif len(sys.argv) == 4 and sys.argv[1] == "--add":
+elif len(sys.argv) == 4 and sys.argv[1] == "--add": #Add new collision between two nodes
     if searchCollision(collisionNets, sys.argv[2], sys.argv[3]) == False:
         addCollision(FILENAME, sys.argv[2], sys.argv[3])
 else:
