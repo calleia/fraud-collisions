@@ -3,8 +3,6 @@
 import sys
 import socket
 import re
-from BaseHTTPServer import BaseHTTPRequestHandler
-from StringIO import StringIO
 
 #Function definitions
 
@@ -46,23 +44,15 @@ def addCollision(filename, v1, v2):
         outputFile.write(aux)
     return
 
-class HTTPRequest(BaseHTTPRequestHandler):
-    def __init__(self, request_text):
-        self.rfile = StringIO(request_text)
-        self.raw_requestline = self.rfile.readline()
-        self.error_code = self.error_message = None
-        self.parse_request()
-
-    def send_error(self, code, message):
-        self.error_code = code
-        self.error_message = message
-
 def processRequest(request_text):
     #Parse request message
-    request = HTTPRequest(request_text)
+    request = str(request_text)
+    if len(request.split()) < 2:
+        return '{"status":"error", "message":"Invalid request syntax."'
+    request = request.split()[1]
 
     #Parse request URI
-    aux = request.path.split("/")
+    aux = request.split("/")
 
     global collisionNets
     global FILENAME
@@ -75,7 +65,7 @@ def processRequest(request_text):
             collisionNets = loadGraph(FILENAME) #Reload the graph after changes
         return '{"status":"ok", "message":"Collision added"}'
 
-    return '{"status":"error", "message":"Invalid request URI.", "requestUri":"'+ request.path +'"}'
+    return '{"status":"error", "message":"Invalid request URI.", "requestUri":"'+ request +'"}'
 
 #Main program
 HOST = "localhost"
@@ -93,14 +83,12 @@ print ("Serving HTTP on port %s..." % PORT)
 
 #Server loop
 while True:
-    print("Waiting for new requests...")
-
     client_connection, client_address = listen_socket.accept()
     request = client_connection.recv(2048)
 
     response = processRequest(request)
     http_response = "HTTP/1.1 200 OK\n"+"Content-Type: application/json\n"+"\n"+response+"\n"
-    client_connection.sendall(http_response)
+    client_connection.sendall(http_response.encode('utf-8'))
     client_connection.close()
 
 
